@@ -20,7 +20,7 @@
             placeholder="find me"
             @searchUpdate="searchUpdate"
     />
-    <Notes :notes="notesFilter" @remove="removeNote" />
+    <Notes @remove="removeNote" />
     <router-view></router-view>
   </div>
 </template>
@@ -46,61 +46,31 @@ export default {
       secondModal: {
         show: false
       },
+      searchValue: '',
       note: {
         title: '',
         descr: ''
-      },
-      searchValue: '',
-      notes: [
-        {
-          title: 'First note',
-          descr: 'Description for first note',
-          date: new Date(Date.now()),
-          isEdit: false
-        },
-        {
-          title: 'Second note',
-          descr: 'Description for second note',
-          date: new Date(Date.now()),
-          isEdit: false
-        },
-        {
-          title: 'Third note',
-          descr: 'Description for third note',
-          date: new Date(Date.now()),
-          isEdit: false
-        }
-      ]
-    }
-  },
-  computed: {
-    notesFilter () {
-      let array = this.notes,
-          search = this.searchValue
-      if (!search) return array
-      search = search.trim().toLowerCase()
-      array = array.filter(item => {
-        if (item.title.toLowerCase().indexOf(search) !== -1) {
-          return item
-        }
-      })
-      return array
+      }
     }
   },
   methods: {
     addNote() {
       let {title, descr} = this.note
-      this.notes.push({
-        title,
-        descr,
-        date: new Date(Date.now())
-      })
+      this.$store.commit(
+              'addNote',
+              {
+                title,
+                descr,
+                date: new Date(Date.now())
+              }
+      )
     },
     removeNote(i) {
-      this.notes.splice(i, 1)
+      this.$store.commit('deleteNote', i)
     },
     searchUpdate(val) {
       this.searchValue = val
+      this.$store.dispatch('notesFilter', this.searchValue)
     },
     closeModal(e) {
       if (e.key === 'Escape') {
@@ -118,6 +88,9 @@ export default {
       this.secondModal.email = ''
     }
   },
+  mounted() {
+    this.$store.commit('initNotes')
+  }
 }
 </script>
 

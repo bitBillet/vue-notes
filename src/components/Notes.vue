@@ -1,6 +1,6 @@
 <template>
   <div class="note_list">
-    <div class="note" v-for="(note, index) in notes" :key="index">
+    <div class="note" v-for="(note, index) in getNotes" :key="index">
       <div class="note_header">
         <p v-if="!note.isEdit">{{ note.title }}
           <span style="margin-left: 20px; color: aqua; cursor: default"
@@ -8,7 +8,7 @@
           >Edit</span>
         </p>
 
-        <input v-if="note.isEdit" type="text" :value="note.title" @keydown="save(note, $event)">
+        <input v-if="note.isEdit" type="text" :value="note.title" @keydown="save(index, $event)">
         <p @click="removeNote(index)" style="cursor: pointer">X</p>
       </div>
       <div class="note_body">
@@ -20,32 +20,25 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
+
 export default {
   name: 'Notes',
-  props: {
-    notes: {
-      type: Array,
-      require: true
-    }
-  },
-  data() {
-    return {
-      isEdit: false
-    }
-  },
+  computed: mapGetters(
+          [
+            'getNotes',
+          ]
+  ),
   methods: {
     removeNote(i) {
       console.log(`Removed note ${i}`)
       this.$emit('remove', i)
     },
     editTitle(id) {
-      this.notes[id].isEdit = true
+      this.$store.commit('editTitle', id)
     },
-    save(note, event) {
-      if (event.key === 'Enter') {
-        note.title = event.target.value
-        note.isEdit = false
-      }
+    save(index, event) {
+      this.$store.dispatch('save', {index, event})
     }
   },
 }
